@@ -1,7 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const fsPromises = fs.promises;
-fsPromises.mkdir(`${path.dirname(__filename)}/files-copy`, { recursive: true }, (err) => {
+fs.mkdir(`${path.dirname(__filename)}/files-copy`, { recursive: true }, (err) => {
   if (err) throw err;
 });
 fs.readdir(`${path.dirname(__filename)}/files`, 'utf-8', function (err, files) {
