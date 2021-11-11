@@ -5,6 +5,14 @@ const dir = path.dirname(__filename);
 let startFrom = path.resolve(`${dir}`,'project-dist', 'assets')
 let pathNewDir = `${path.dirname(__filename)}/project-dist/assets`
 let pathCopy = `${path.dirname(__filename)}/assets`
+const fspromise = require('fs').promises;
+
+async function deleteDir(){
+  await fspromise.rm('06-build-page/project-dist/assets', {
+    recursive: true, force: true
+  }, (err) => { if (err) throw err;
+  })
+}
 fs.mkdir(`${dir}/project-dist`, function(err) {
   if (err) {
     fs.unlink(`${dir}/project-dist/style.css`, function(err) {
@@ -60,46 +68,13 @@ fs.mkdir(`${dir}/project-dist`, function(err) {
   }
 })
 
-function deleteDir (dir) {
- return new Promise ((resolve) => {
-  if (dir) {
-    fs.readdir(`${dir}`, 'utf-8', function(err, files) {
-      if (err) { return
-      }
-      else if (files.length == 0) {
-        fs.rmdir(`${dir}`, function(err, dir) {
-          if (err) return;
-        })
-      }
-      else if (files.length > 0) {
-      files.forEach(file => {
-        fs.stat(`${dir}/${file}`, (err, stats) => {
-          if (err) {
-            return
-          }
-          else if (!stats.isFile()) {
-            let nextDir = path.resolve(dir, file)
-            deleteDir(nextDir)
-          } 
-          else if (stats.isFile()) {
-            fs.unlink(`${dir}/${file}`, (err) => {
-              if (err) return;
-            })
-          }
-        })
-      })
-      let nextDir = path.resolve(dir)
-      deleteDir(nextDir)
-    }
-    })
-  }
- })
-}
-
-
 function copyDir (pathNewDir, pathCopy) {
-  fs.mkdir(`${pathNewDir}`, (err) => {
-    if (err) return;
+  fs.rmdir(`${pathNewDir}`, (err) => {
+    if (err) {
+      fs.mkdir(`${pathNewDir}`, (err) => {
+        if (err) return;
+      });
+    };
   });
   fs.readdir(`${pathCopy}`, 'utf-8', function (err, files) {
     if (err) {
@@ -120,7 +95,7 @@ function copyDir (pathNewDir, pathCopy) {
     }
   })
 }
-copyDir (pathNewDir, pathCopy)
+
 
 
 
@@ -148,4 +123,10 @@ fs.readFile(`${dir}/template.html`, 'utf8', function (err, data) {
   })
 });
 }
-writeHtml()
+
+async function create () {
+  await writeHtml()
+  await deleteDir()
+  await copyDir (pathNewDir, pathCopy)
+}
+create()
